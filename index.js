@@ -8,7 +8,7 @@ const port = process.env.PORT || 5000;
 
 // middleware
 app.use(cors());
-// app.use(json());
+app.use(express.json());
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.1ujyx.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
 
@@ -17,7 +17,16 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 async function run() {
     try {
         await client.connect();
-        console.log('database connected successfuly');
+        const database = client.db('doctors_portal');
+        const appointmentsCollection = database.collection('appointments');
+
+        // post api
+        app.post('/appointments', async (req, res) => {
+            const appointment = req.body;
+            const result = await appointmentsCollection.insertOne(appointment);
+            console.log(result);
+            res.json(result);
+        })
     }
     finally {
         // await client.close();
